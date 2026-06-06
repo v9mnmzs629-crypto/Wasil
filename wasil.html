@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wasil — وصل</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0a0a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .phone {
+      width: 375px;
+      min-height: 740px;
+      background: #000;
+      border-radius: 44px;
+      border: 1.5px solid #2a2a2a;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .screen {
+      width: 100%;
+      min-height: 740px;
+      background: #000;
+      color: #fff;
+      display: none;
+      flex-direction: column;
+    }
+
+    /* Tablet — show as a centered phone on a dark canvas */
+    @media (min-width: 600px) and (max-width: 1023px) {
+      body {
+        align-items: center;
+        padding: 2rem 0;
+      }
+      .phone {
+        width: 390px;
+        min-height: 780px;
+        border-radius: 48px;
+      }
+      .screen { min-height: 780px; }
+    }
+
+    /* Desktop / large tablet — same phone frame, just floats nicely */
+    @media (min-width: 1024px) {
+      body {
+        align-items: center;
+        padding: 2rem 0;
+      }
+      .phone {
+        width: 400px;
+        min-height: 800px;
+        border-radius: 52px;
+        box-shadow: 0 0 80px rgba(255,255,255,0.03);
+      }
+      .screen { min-height: 800px; }
+    }
+
+    /* Small phones — fill the screen edge to edge */
+    @media (max-width: 420px) {
+      body { align-items: flex-start; background: #000; }
+      .phone {
+        width: 100vw;
+        min-height: 100vh;
+        border-radius: 0;
+        border: none;
+      }
+      .screen { min-height: 100vh; }
+    }
+
+    .screen.active { display: flex; }
+
+    .notch {
+      width: 110px;
+      height: 28px;
+      background: #000;
+      border: 1px solid #1a1a1a;
+      border-radius: 0 0 18px 18px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 10;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 22px 4px;
+      font-size: 11px;
+      color: #555;
+      letter-spacing: 0.02em;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: #555;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'DM Sans', sans-serif;
+      transition: color 0.2s;
+    }
+
+    .back-btn:hover { color: #fff; }
+
+    .divider {
+      width: 100%;
+      height: 0.5px;
+      background: #111;
+    }
+
+    /* SPLASH */
+    .splash-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 2.5rem 3rem;
+      text-align: center;
+    }
+
+    .app-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 56px;
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .app-arabic {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      font-weight: 300;
+      color: #3a3a3a;
+      letter-spacing: 0.14em;
+      margin-bottom: 28px;
+    }
+
+    .line-accent {
+      width: 32px;
+      height: 0.5px;
+      background: #222;
+      margin: 0 auto 32px;
+    }
+
+    .tagline {
+      font-size: 12px;
+      font-weight: 300;
+      color: #444;
+      letter-spacing: 0.05em;
+      line-height: 1.8;
+      max-width: 220px;
+      margin-bottom: 56px;
+      font-style: italic;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    /* BUTTONS */
+    .btn-primary {
+      width: 100%;
+      padding: 15px 0;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 2px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      margin-bottom: 10px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary:hover { opacity: 0.82; }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 15px 0;
+      background: transparent;
+      color: #666;
+      border: 0.5px solid #222;
+      border-radius: 2px;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover { border-color: #555; color: #ccc; }
+
+    .btn-ghost {
+      background: none;
+      border: none;
+      color: #333;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 22px;
+      font-family: 'DM Sans', sans-serif;
+      transition: color 0.2s;
+    }
+
+    .btn-ghost:hover { color: #666; }
+
+    /* FORM SCREENS */
+    .screen-header {
+      padding: 16px 22px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .screen-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      font-weight: 300;
+      letter-spacing: 0.06em;
+      color: #fff;
+    }
+
+    .screen-body {
+      flex: 1;
+      padding: 0 22px 28px;
+      overflow-y: auto;
+    }
+
+    .label {
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #333;
+      margin-bottom: 6px;
+      margin-top: 20px;
+      display: block;
+    }
+
+    .input-field {
+      width: 100%;
+      background: #080808;
+      border: 0.5px solid #1a1a1a;
+      border-radius: 2px;
+      padding: 12px 14px;
+      color: #aaa;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus { border-color: #444; color: #ddd; }
+
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 0.5px solid #0e0e0e;
+    }
+
+    .toggle-label {
+      font-size: 12px;
+      color: #666;
+      letter-spacing: 0.02em;
+    }
+
+    .toggle {
+      width: 38px;
+      height: 22px;
+      background: #1a1a1a;
+      border-radius: 11px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.25s;
+      flex-shrink: 0;
+    }
+
+    .toggle.on { background: #e8e8e8; }
+
+    .toggle-thumb {
+      width: 16px;
+      height: 16px;
+      background: #444;
+      border-radius: 50%;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      transition: all 0.25s;
+    }
+
+    .toggle.on .toggle-thumb { left: 19px; background: #111; }
+
+    /* DASHBOARD */
+    .dash-greeting {
+      padding: 20px 22px 10px;
+    }
+
+    .greeting-sub {
+      font-size: 9px;
+      color: #2a2a2a;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .greeting-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px;
+      font-weight: 300;
+      color: #fff;
+      letter-spacing: 0.04em;
+    }
+
+    .dash-stat-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      padding: 14px 22px;
+    }
+
+    .stat-card {
+      background: #080808;
+      border: 0.5px solid #111;
+      border-radius: 4px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 300;
+      color: #ccc;
+    }
+
+    .stat-label {
+      font-size: 8px;
+      color: #2a2a2a;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #2a2a2a;
+      padding: 0 22px;
+      margin-bottom: 8px;
+    }
+
+    .upcoming-card {
+      margin: 0 22px 8px;
+      background: #080808;
+      border: 0.5px solid #141414;
+      border-radius: 4px;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .upcoming-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      color: #bbb;
+      margin-bottom: 2px;
+    }
+
+    .upcoming-time {
+      font-size: 9px;
+      color: #333;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .upcoming-type {
+      font-size: 9px;
+      color: #333;
+      border: 0.5px solid #1a1a1a;
+      border-radius: 2px;
+      padding: 4px 8px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .upcoming-type:hover { border-color: #444; color: #888; }
+
+    /* NAV BAR */
+    .nav-bar {
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0 18px;
+      border-top: 0.5px solid #0e0e0e;
+      background: #000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: #2a2a2a;
+      transition: color 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .nav-item:hover, .nav-item.active { color: #777; }
+
+    .nav-label {
+      font-size: 8px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    /* MATCHES */
+    .companion-card {
+      background: #080808;
+      border: 0.5px solid #141414;
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .companion-card:hover { border-color: #2a2a2a; }
+
+    .companion-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 400;
+      color: #ccc;
+      margin-bottom: 4px;
+    }
+
+    .companion-meta {
+      font-size: 10px;
+      color: #333;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .companion-status {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #1a1a1a;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .companion-status.active { background: #666; }
+
+    .call-btn {
+      width: 100%;
+      padding: 11px 0;
+      background: #0d0d0d;
+      color: #666;
+      border: 0.5px solid #1a1a1a;
+      border-radius: 2px;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .call-btn:hover { background: #141414; border-color: #333; color: #aaa; }
+
+    /* REWARDS */
+    .points-display {
+      text-align: center;
+      padding: 28px 0 22px;
+    }
+
+    .points-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 54px;
+      font-weight: 300;
+      color: #fff;
+      letter-spacing: 0.04em;
+    }
+
+    .points-label {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #333;
+      margin-top: 4px;
+    }
+
+    .reward-card {
+      background: #080808;
+      border: 0.5px solid #141414;
+      border-radius: 4px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .reward-name {
+      font-size: 12px;
+      color: #aaa;
+      letter-spacing: 0.02em;
+      margin-bottom: 3px;
+    }
+
+    .reward-pts {
+      font-size: 9px;
+      color: #333;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .reward-badge {
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #444;
+      border: 0.5px solid #1a1a1a;
+      border-radius: 2px;
+      padding: 5px 10px;
+      cursor: pointer;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .reward-badge:hover { border-color: #444; color: #888; }
+
+    /* CALL SCREEN */
+    .call-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .avatar-circle {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      border: 0.5px solid #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+
+    .avatar-initial {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 300;
+      color: #555;
+    }
+
+    .call-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px;
+      font-weight: 300;
+      color: #fff;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+
+    .call-location {
+      font-size: 10px;
+      color: #2a2a2a;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .call-status {
+      font-size: 10px;
+      color: #1f1f1f;
+      letter-spacing: 0.1em;
+      margin-bottom: 64px;
+    }
+
+    .call-controls {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .btn-sm {
+      padding: 9px 16px;
+      background: transparent;
+      color: #444;
+      border: 0.5px solid #1a1a1a;
+      border-radius: 2px;
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .btn-sm:hover { border-color: #333; color: #777; }
+
+    .end-call-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #111;
+      border: 0.5px solid #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .end-call-btn:hover { background: #1a1a1a; }
+
+    .call-points {
+      margin-top: 52px;
+      font-size: 10px;
+      color: #1f1f1f;
+      letter-spacing: 0.06em;
+      font-style: italic;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    /* SCROLLBAR */
+    .screen-body::-webkit-scrollbar { width: 2px; }
+    .screen-body::-webkit-scrollbar-track { background: transparent; }
+    .screen-body::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+  <div class="phone">
+
+    <!-- SPLASH -->
+    <div id="splash" class="screen active">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:41</span><span>100%</span></div>
+      <div class="splash-content">
+        <div class="app-name">WASIL</div>
+        <div class="app-arabic">وصل &nbsp;·&nbsp; connection</div>
+        <div class="line-accent"></div>
+        <div class="tagline">Because some voices shouldn't go unheard.</div>
+        <button class="btn-primary" onclick="show('volunteer')">I want to volunteer</button>
+        <button class="btn-secondary" onclick="show('companion')">I need a companion</button>
+        <button class="btn-ghost" onclick="show('dashboard')">Sign in</button>
+      </div>
+    </div>
+
+    <!-- VOLUNTEER SIGNUP -->
+    <div id="volunteer" class="screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:41</span><span>100%</span></div>
+      <div class="screen-header">
+        <button class="back-btn" onclick="show('splash')">&#8592; Back</button>
+        <span style="font-size:10px;color:#2a2a2a;letter-spacing:0.12em;text-transform:uppercase;">Volunteer</span>
+      </div>
+      <div class="divider"></div>
+      <div class="screen-body">
+        <div style="padding-top:18px;margin-bottom:4px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:#fff;letter-spacing:0.04em;margin-bottom:5px;">Join Wasil.</div>
+          <div style="font-size:11px;color:#333;line-height:1.7;font-style:italic;font-family:'Cormorant Garamond',serif;">Give an hour. Change a life.</div>
+        </div>
+        <span class="label">Full name</span>
+        <input class="input-field" type="text" placeholder="Your name" />
+        <span class="label">University</span>
+        <input class="input-field" type="text" placeholder="Institution" />
+        <span class="label">City</span>
+        <input class="input-field" type="text" placeholder="Where are you based?" />
+        <span class="label">Availability</span>
+        <input class="input-field" type="text" placeholder="e.g. Weekday evenings" />
+        <div class="toggle-row" style="margin-top:22px;">
+          <span class="toggle-label">Phone and video calls</span>
+          <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">In-person visits</span>
+          <div class="toggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">School program enrollment</span>
+          <div class="toggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+        </div>
+        <div style="margin-top:30px;">
+          <button class="btn-primary" onclick="show('dashboard')">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPANION REQUEST -->
+    <div id="companion" class="screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:41</span><span>100%</span></div>
+      <div class="screen-header">
+        <button class="back-btn" onclick="show('splash')">&#8592; Back</button>
+        <span style="font-size:10px;color:#2a2a2a;letter-spacing:0.12em;text-transform:uppercase;">Request</span>
+      </div>
+      <div class="divider"></div>
+      <div class="screen-body">
+        <div style="padding-top:18px;margin-bottom:4px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:#fff;margin-bottom:5px;">Find a companion.</div>
+          <div style="font-size:11px;color:#333;line-height:1.7;font-style:italic;font-family:'Cormorant Garamond',serif;">For someone who deserves to be heard.</div>
+        </div>
+        <span class="label">Name of elder</span>
+        <input class="input-field" type="text" placeholder="Full name" />
+        <span class="label">Location</span>
+        <input class="input-field" type="text" placeholder="City, country" />
+        <span class="label">Language preference</span>
+        <input class="input-field" type="text" placeholder="e.g. Arabic, English, Urdu" />
+        <span class="label">Contact frequency</span>
+        <input class="input-field" type="text" placeholder="e.g. Twice a week" />
+        <div class="toggle-row" style="margin-top:22px;">
+          <span class="toggle-label">Calls only</span>
+          <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Open to visits</span>
+          <div class="toggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+        </div>
+        <div style="margin-top:30px;">
+          <button class="btn-primary" onclick="show('dashboard')">Find a match</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:41</span><span>100%</span></div>
+      <div class="dash-greeting">
+        <div class="greeting-sub">Good evening</div>
+        <div class="greeting-name">Aiden</div>
+      </div>
+      <div class="divider"></div>
+      <div class="dash-stat-row">
+        <div class="stat-card">
+          <div class="stat-num">12</div>
+          <div class="stat-label">Calls made</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">340</div>
+          <div class="stat-label">Points earned</div>
+        </div>
+      </div>
+      <div class="section-label">Upcoming</div>
+      <div class="upcoming-card">
+        <div>
+          <div class="upcoming-name">Margaret, 74</div>
+          <div class="upcoming-time">Today &nbsp;·&nbsp; 6:00 PM</div>
+        </div>
+        <button class="upcoming-type" onclick="show('call')">Call</button>
+      </div>
+      <div class="upcoming-card">
+        <div>
+          <div class="upcoming-name">Hassan, 81</div>
+          <div class="upcoming-time">Tomorrow &nbsp;·&nbsp; 4:30 PM</div>
+        </div>
+        <span class="upcoming-type">Visit</span>
+      </div>
+      <div style="flex:1;"></div>
+      <div class="nav-bar">
+        <button class="nav-item active" onclick="show('dashboard')">
+          <i class="ti ti-home" style="font-size:20px;" aria-hidden="true"></i>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" onclick="show('matches')">
+          <i class="ti ti-users" style="font-size:20px;" aria-hidden="true"></i>
+          <span class="nav-label">Matches</span>
+        </button>
+        <button class="nav-item" onclick="show('rewards')">
+          <i class="ti ti-gift" style="font-size:20px;" aria-hidden="true"></i>
+          <span class="nav-label">Rewards</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- MATCHES -->
+    <div id="matches" class="screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:41</span><span>100%</span></div>
+      <div class="screen-header">
+        <span class="screen-title">Your matches</span>
+        <span style="font-size:10px;color:#2a2a2a;letter-spacing:0.08em;">3 active</span>
+      </div>
+      <div class="divider"></div>
+      <div class="screen-body" style="padding-top:18px;">
+        <div class="companion-card" onclick="show('call')">
+          <div><span class="companion-status active"></span><span class="companion-name">Margaret</span></div>
+          <div class="companion-meta">74 &nbsp;·&nbsp; Edinburgh, Scotland &nbsp;·&nbsp; English</div>
+          <button class="call-btn">Call now</button>
+        </div>
+        <div class="companion-card">
+          <div><span class="companion-status active"></span><span class="companion-name">Hassan</span></div>
+          <div class="companion-meta">81 &nbsp;·&nbsp; Karachi, Pakistan &nbsp;·&nbsp; Urdu, English</div>
+          <button class="call-btn">Schedule visit</button>
+        </div>
+        <div class="companion-card">
+          <div><span class="companion-status"></span><span class="companion-name">Lena</span></div>
+          <div class="companion-meta">69 &nbsp;·&nbsp; Manila, Philippines &nbsp;·&nbsp; English</div>
+          <button class="call-btn">Call now</button>
+        </div>
+      </div>
+      <div class="nav-bar">
+        <button class="nav-item" onclick="show('dashboard')">
+          <i class="ti ti-home" style="font-size:20px;" aria-hidden="true"></i>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item active" onclick="show('matches')">
+          <i class="ti ti-users" style="font-size:20px;" aria-hidden="true"></i>
+          <span class="nav-label">Matches</span>
+        </button>
+        <button class="nav-item" onclick="show('rewards')">
+          <i class="ti ti-gift" style="font-size:20px;" aria-hidden="true"></i>
+          <span class="nav-label">Rewards</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- REWARDS -->
+    <div id="rewards" class="screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:41</span><span>100%</span></div>
+      <div class="screen-header">
+        <span class="screen-title">Rewards</span>
+      </div>
+      <div class="divider"></div>
+      <div class="screen-body">
+        <div class="points-display">
+          <div class="points-num">340</div>
+          <div class="points-label">Wasil points</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#2a2a2a;margin:16px 0 10px;">Available rewards</div>
+        <div class="reward-card">
+          <div><div class="reward-name">Noon Gift Card</div><div class="reward-pts">500 pts</div></div>
+          <button class="reward-badge">Redeem</button>
+        </div>
+        <div class="reward-card">
+          <div><div class="reward-name">Free meal — Caribou Coffee</div><div class="reward-pts">200 pts</div></div>
+          <button class="reward-badge">Redeem</button>
+        </div>
+        <div class="reward-card">
+          <div><div class="reward-name">Community service certificate</div><div class="reward-pts">100 pts</div></div>
+          <button class="reward-badge">Claim</button>
+        </div>
+        <div class="reward-card">
+          <div><div class="reward-name">Amazon Gift Card</div><div class="reward-pts">800 pts</div></div>
+          <button class="reward-badge">Redeem</button>
+        </div>
+        <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#2a2a2a;margin:20px 0 8px;">How to earn</div>
+        <div class="toggle-row"><span class="toggle-label">Completed call &nbsp;·&nbsp; +20 pts</span></div>
+        <div class="toggle-row"><span class="toggle-label">In-person visit &nbsp;·&nbsp; +50 pts</span></div>
+        <div class="toggle-row" style="border:none;"><span class="toggle-label">Monthly streak &nbsp;·&nbsp; +100 pts</span></div>
+      </div>
+      <div class="nav-bar">
+        <button class="nav-item" onclick="show('dashboard')">
+          <i class="ti ti-home" style="font-size:20px;" aria-hidden="true"></i>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" onclick="show('matches')">
+          <i class="ti ti-users" style="font-size:20px;" aria-hidden="true"></i>
+          <span class="nav-label">Matches</span>
+        </button>
+        <button class="nav-item active" onclick="show('rewards')">
+          <i class="ti ti-gift" style="font-size:20px;" aria-hidden="true"></i>
+          <span class="nav-label">Rewards</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- CALL SCREEN -->
+    <div id="call" class="screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>9:41</span><span>100%</span></div>
+      <div class="call-content">
+        <div class="avatar-circle">
+          <span class="avatar-initial">M</span>
+        </div>
+        <div class="call-name">Margaret</div>
+        <div class="call-location">Edinburgh, Scotland</div>
+        <div class="call-status">Calling...</div>
+        <div class="call-controls">
+          <button class="btn-sm">Mute</button>
+          <div class="end-call-btn" onclick="show('matches')">
+            <i class="ti ti-phone-off" style="font-size:22px;color:#444;" aria-hidden="true"></i>
+          </div>
+          <button class="btn-sm">Speaker</button>
+        </div>
+        <div class="call-points">+20 pts after this call</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function show(id) {
+      document.querySelectorAll('.screen').forEach(function(s) {
+        s.classList.remove('active');
+      });
+      var target = document.getElementById(id);
+      if (target) target.classList.add('active');
+    }
+  </script>
+
+</body>
+</html>
